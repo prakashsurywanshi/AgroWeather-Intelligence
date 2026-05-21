@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgroWeather Intelligence — OSINT-Style Farm Weather Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+/* Art direction: AgriWeather OSINT Dashboard → precision + earthy green + dark mode analytics
+   Palette: deep charcoal surfaces, teal-green accent (crop/nature vibes)
+   Typography: Inter (body) + JetBrains Mono (data values)
+   Density: balanced → data-dense panels with breathing room */
+
+:root, [data-theme="light"] {
+  --color-bg:             #f4f6f1;
+  --color-surface:        #f7f9f5;
+  --color-surface-2:      #fafbf8;
+  --color-surface-offset: #eef1ea;
+  --color-surface-offset-2: #e8eddf;
+  --color-surface-dynamic: #dde5d4;
+  --color-divider:        #d4dcca;
+  --color-border:         #c8d4bd;
+  --color-text:           #1e2a15;
+  --color-text-muted:     #5a6b4e;
+  --color-text-faint:     #9aab8c;
+  --color-text-inverse:   #f4f6f1;
+  --color-primary:        #2d7a3a;
+  --color-primary-hover:  #1f5c2a;
+  --color-primary-active: #144020;
+  --color-primary-highlight: #c8e6cc;
+  --color-warning:        #c17b1a;
+  --color-warning-hover:  #9a5e10;
+  --color-warning-active: #713f08;
+  --color-warning-highlight: #f0ddc0;
+  --color-error:          #b5242e;
+  --color-error-hover:    #8f1a22;
+  --color-error-active:   #6a1018;
+  --color-error-highlight: #f0c8ca;
+  --color-success:        #1e7a3a;
+  --color-success-hover:  #145a28;
+  --color-success-active: #0d3d1a;
+  --color-success-highlight: #c0e8cc;
+  --color-blue:           #1a6a96;
+  --color-blue-hover:     #105278;
+  --color-blue-active:    #083a58;
+  --color-blue-highlight: #bdd8ee;
+  --color-gold:           #c8960a;
+  --color-gold-hover:     #a07808;
+  --color-gold-active:    #785606;
+  --color-gold-highlight: #f0e4b0;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-full: 9999px;
+  --transition-interactive: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  --shadow-sm: 0 1px 2px oklch(0.2 0.04 120 / 0.06);
+  --shadow-md: 0 4px 12px oklch(0.2 0.04 120 / 0.09);
+  --shadow-lg: 0 12px 32px oklch(0.2 0.04 120 / 0.13);
+  --content-narrow: 640px;
+  --content-default: 960px;
+  --content-wide: 1280px;
+  --font-body: 'Inter', 'Helvetica Neue', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+[data-theme="dark"] {
+  --color-bg:             #0f1410;
+  --color-surface:        #141a14;
+  --color-surface-2:      #192019;
+  --color-surface-offset: #1c231c;
+  --color-surface-offset-2: #212821;
+  --color-surface-dynamic: #2a342a;
+  --color-divider:        #242e24;
+  --color-border:         #3a4a3a;
+  --color-text:           #c8d4be;
+  --color-text-muted:     #7a8c72;
+  --color-text-faint:     #536048;
+  --color-text-inverse:   #1a2218;
+  --color-primary:        #4daa5c;
+  --color-primary-hover:  #3a8a48;
+  --color-primary-active: #2a6836;
+  --color-primary-highlight: #1e3824;
+  --color-warning:        #e09040;
+  --color-warning-hover:  #d07828;
+  --color-warning-active: #b86018;
+  --color-warning-highlight: #3a2a18;
+  --color-error:          #e05560;
+  --color-error-hover:    #c84048;
+  --color-error-active:   #a83038;
+  --color-error-highlight: #3a1c20;
+  --color-success:        #50b863;
+  --color-success-hover:  #3c9a4e;
+  --color-success-active: #2c7a3c;
+  --color-success-highlight: #1a3022;
+  --color-blue:           #5098d0;
+  --color-blue-hover:     #3c80b8;
+  --color-blue-active:    #2c68a0;
+  --color-blue-highlight: #183048;
+  --color-gold:           #e8b840;
+  --color-gold-hover:     #d0a028;
+  --color-gold-active:    #b88818;
+  --color-gold-highlight: #382c10;
+  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.3);
+  --shadow-md: 0 4px 12px oklch(0 0 0 / 0.4);
+  --shadow-lg: 0 12px 32px oklch(0 0 0 / 0.5);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --color-bg: #0f1410; --color-surface: #141a14; --color-surface-2: #192019;
+    --color-surface-offset: #1c231c; --color-surface-offset-2: #212821;
+    --color-surface-dynamic: #2a342a; --color-divider: #242e24; --color-border: #3a4a3a;
+    --color-text: #c8d4be; --color-text-muted: #7a8c72; --color-text-faint: #536048;
+    --color-primary: #4daa5c; --color-primary-hover: #3a8a48; --color-primary-highlight: #1e3824;
+    --color-warning: #e09040; --color-error: #e05560; --color-success: #50b863;
+    --color-blue: #5098d0; --color-gold: #e8b840;
+  }
+}
+
+:root {
+  --text-xs:   clamp(0.75rem,  0.7rem  + 0.25vw, 0.875rem);
+  --text-sm:   clamp(0.875rem, 0.8rem  + 0.35vw, 1rem);
+  --text-base: clamp(1rem,     0.95rem + 0.25vw, 1.125rem);
+  --text-lg:   clamp(1.125rem, 1rem    + 0.75vw, 1.5rem);
+  --text-xl:   clamp(1.5rem,   1.2rem  + 1.25vw, 2.25rem);
+  --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem;
+  --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem;
+  --space-12: 3rem; --space-16: 4rem; --space-20: 5rem;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scroll-padding-top: var(--space-16); -webkit-font-smoothing: antialiased; }
+body { min-height: 100dvh; font-family: var(--font-body); font-size: var(--text-base); color: var(--color-text); background: var(--color-bg); line-height: 1.6; }
+img { display: block; max-width: 100%; height: auto; }
+input, button, select { font: inherit; color: inherit; }
+button { cursor: pointer; background: none; border: none; }
+a { color: inherit; text-decoration: none; transition: color var(--transition-interactive); }
+ul { list-style: none; }
+
+/* LAYOUT */
+.app-shell { display: grid; grid-template-columns: 260px 1fr; grid-template-rows: auto 1fr; min-height: 100dvh; }
+.topbar { grid-column: 1 / -1; background: var(--color-surface); border-bottom: 1px solid var(--color-border); padding: var(--space-3) var(--space-6); display: flex; align-items: center; gap: var(--space-4); position: sticky; top: 0; z-index: 100; }
+.sidebar { background: var(--color-surface); border-right: 1px solid var(--color-border); padding: var(--space-6) 0; overflow-y: auto; }
+.main-content { overflow-y: auto; padding: var(--space-6) var(--space-8); background: var(--color-bg); }
+
+/* TOPBAR */
+.logo-mark { display: flex; align-items: center; gap: var(--space-2); font-weight: 700; font-size: var(--text-sm); letter-spacing: -0.01em; }
+.logo-icon { width: 28px; height: 28px; }
+.topbar-center { flex: 1; display: flex; align-items: center; gap: var(--space-3); }
+.search-bar { flex: 1; max-width: 420px; position: relative; }
+.search-bar input { width: 100%; background: var(--color-surface-offset); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-2) var(--space-4) var(--space-2) 2.5rem; font-size: var(--text-sm); color: var(--color-text); transition: border-color var(--transition-interactive); }
+.search-bar input:focus { outline: none; border-color: var(--color-primary); }
+.search-bar .s-icon { position: absolute; left: var(--space-3); top: 50%; transform: translateY(-50%); color: var(--color-text-muted); pointer-events: none; }
+.topbar-actions { display: flex; align-items: center; gap: var(--space-2); margin-left: auto; }
+.icon-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); color: var(--color-text-muted); transition: background var(--transition-interactive), color var(--transition-interactive); }
+.icon-btn:hover { background: var(--color-surface-offset); color: var(--color-text); }
+.status-dot { width: 8px; height: 8px; border-radius: var(--radius-full); background: var(--color-success); display: inline-block; }
+.live-badge { display: flex; align-items: center; gap: var(--space-1); font-size: var(--text-xs); color: var(--color-success); font-weight: 500; background: var(--color-success-highlight); padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); }
+
+/* SIDEBAR */
+.nav-section { padding: 0 var(--space-3); margin-bottom: var(--space-6); }
+.nav-section-label { font-size: var(--text-xs); color: var(--color-text-faint); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 0 var(--space-3) var(--space-2); }
+.nav-item { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); font-size: var(--text-sm); color: var(--color-text-muted); transition: background var(--transition-interactive), color var(--transition-interactive); cursor: pointer; }
+.nav-item:hover { background: var(--color-surface-offset); color: var(--color-text); }
+.nav-item.active { background: var(--color-primary-highlight); color: var(--color-primary); font-weight: 500; }
+.nav-item i { width: 16px; height: 16px; flex-shrink: 0; }
+.nav-divider { height: 1px; background: var(--color-divider); margin: var(--space-4) var(--space-3); }
+
+/* CARDS & GRIDS */
+.card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-5); box-shadow: var(--shadow-sm); }
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-4); }
+.card-title { font-size: var(--text-sm); font-weight: 600; color: var(--color-text); display: flex; align-items: center; gap: var(--space-2); }
+.card-subtitle { font-size: var(--text-xs); color: var(--color-text-muted); margin-top: 2px; }
+
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); margin-bottom: var(--space-6); }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); margin-bottom: var(--space-6); }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-bottom: var(--space-6); }
+.grid-3-1 { display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-4); margin-bottom: var(--space-6); }
+
+/* KPI CARDS */
+.kpi-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-5); box-shadow: var(--shadow-sm); }
+.kpi-label { font-size: var(--text-xs); color: var(--color-text-muted); font-weight: 500; margin-bottom: var(--space-2); display: flex; align-items: center; gap: var(--space-2); }
+.kpi-value { font-size: var(--text-xl); font-family: var(--font-mono); font-weight: 600; color: var(--color-text); line-height: 1.1; }
+.kpi-change { font-size: var(--text-xs); margin-top: var(--space-2); display: flex; align-items: center; gap: 4px; }
+.kpi-change.up { color: var(--color-success); }
+.kpi-change.down { color: var(--color-error); }
+.kpi-change.warn { color: var(--color-warning); }
+
+/* WEATHER BARS */
+.weather-bar-wrap { margin-bottom: var(--space-4); }
+.weather-bar-header { display: flex; justify-content: space-between; margin-bottom: var(--space-1); font-size: var(--text-xs); color: var(--color-text-muted); }
+.weather-bar { height: 6px; background: var(--color-surface-offset-2); border-radius: var(--radius-full); overflow: hidden; }
+.weather-bar-fill { height: 100%; border-radius: var(--radius-full); transition: width 0.8s ease; }
+.bar-rain { background: var(--color-blue); }
+.bar-temp { background: var(--color-warning); }
+.bar-humidity { background: var(--color-primary); }
+.bar-wind { background: var(--color-gold); }
+
+/* DATA TABLE */
+.data-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+.data-table th { text-align: left; padding: var(--space-3) var(--space-4); font-size: var(--text-xs); color: var(--color-text-muted); font-weight: 600; border-bottom: 1px solid var(--color-border); background: var(--color-surface-offset); letter-spacing: 0.04em; text-transform: uppercase; }
+.data-table td { padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--color-divider); color: var(--color-text); font-family: var(--font-mono); font-size: var(--text-xs); }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: var(--color-surface-offset); }
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px var(--space-2); border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 500; }
+.badge-success { background: var(--color-success-highlight); color: var(--color-success); }
+.badge-warn { background: var(--color-warning-highlight); color: var(--color-warning); }
+.badge-error { background: var(--color-error-highlight); color: var(--color-error); }
+.badge-info { background: var(--color-blue-highlight); color: var(--color-blue); }
+.badge-muted { background: var(--color-surface-offset-2); color: var(--color-text-muted); }
+
+/* CHART PLACEHOLDER (Canvas-based via Chart.js) */
+.chart-area { width: 100%; height: 180px; position: relative; }
+.chart-mini { width: 100%; height: 80px; }
+
+/* FORECAST TILES */
+.forecast-row { display: flex; gap: var(--space-3); margin-bottom: var(--space-4); overflow-x: auto; padding-bottom: var(--space-2); }
+.forecast-tile { flex-shrink: 0; background: var(--color-surface-offset); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-4) var(--space-5); text-align: center; min-width: 90px; }
+.forecast-day { font-size: var(--text-xs); color: var(--color-text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+.forecast-icon { width: 28px; height: 28px; margin: var(--space-2) auto; color: var(--color-gold); }
+.forecast-temp { font-family: var(--font-mono); font-size: var(--text-base); font-weight: 600; }
+.forecast-rain-pct { font-size: var(--text-xs); color: var(--color-blue); margin-top: 2px; }
+.forecast-tile.today { background: var(--color-primary-highlight); border-color: var(--color-primary); }
+.forecast-tile.today .forecast-day { color: var(--color-primary); }
+
+/* ALERT CARDS */
+.alert-item { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); margin-bottom: var(--space-3); border: 1px solid; }
+.alert-item.warn { background: var(--color-warning-highlight); border-color: color-mix(in oklch, var(--color-warning) 30%, transparent); }
+.alert-item.error { background: var(--color-error-highlight); border-color: color-mix(in oklch, var(--color-error) 30%, transparent); }
+.alert-item.success { background: var(--color-success-highlight); border-color: color-mix(in oklch, var(--color-success) 30%, transparent); }
+.alert-item.info { background: var(--color-blue-highlight); border-color: color-mix(in oklch, var(--color-blue) 30%, transparent); }
+.alert-icon { flex-shrink: 0; margin-top: 2px; }
+.alert-icon.warn { color: var(--color-warning); }
+.alert-icon.error { color: var(--color-error); }
+.alert-icon.success { color: var(--color-success); }
+.alert-icon.info { color: var(--color-blue); }
+.alert-title { font-size: var(--text-sm); font-weight: 600; }
+.alert-desc { font-size: var(--text-xs); color: var(--color-text-muted); margin-top: 2px; }
+
+/* DATASET TABLE */
+.ds-row { display: flex; align-items: center; padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--color-divider); gap: var(--space-4); font-size: var(--text-sm); transition: background var(--transition-interactive); }
+.ds-row:hover { background: var(--color-surface-offset); }
+.ds-row:last-child { border-bottom: none; }
+.ds-icon { width: 32px; height: 32px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ds-name { font-weight: 500; }
+.ds-desc { font-size: var(--text-xs); color: var(--color-text-muted); }
+.ds-tags { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.ds-meta { margin-left: auto; text-align: right; font-size: var(--text-xs); color: var(--color-text-muted); }
+.ds-link { color: var(--color-primary); font-size: var(--text-xs); font-weight: 500; transition: color var(--transition-interactive); }
+.ds-link:hover { color: var(--color-primary-hover); }
+
+/* PAGE HEADER */
+.page-header { margin-bottom: var(--space-6); }
+.page-header h1 { font-size: var(--text-xl); font-weight: 700; letter-spacing: -0.02em; color: var(--color-text); }
+.page-header p { font-size: var(--text-sm); color: var(--color-text-muted); margin-top: var(--space-1); }
+.page-header-row { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); }
+.location-pill { display: flex; align-items: center; gap: var(--space-2); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-full); padding: var(--space-2) var(--space-4); font-size: var(--text-xs); color: var(--color-text-muted); cursor: pointer; transition: border-color var(--transition-interactive); }
+.location-pill:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.location-pill i { width: 14px; height: 14px; }
+
+/* TABS */
+.tab-bar { display: flex; gap: var(--space-1); background: var(--color-surface-offset); border-radius: var(--radius-lg); padding: var(--space-1); margin-bottom: var(--space-6); width: fit-content; }
+.tab-btn { padding: var(--space-2) var(--space-5); border-radius: var(--radius-md); font-size: var(--text-sm); color: var(--color-text-muted); font-weight: 500; transition: background var(--transition-interactive), color var(--transition-interactive); cursor: pointer; border: none; background: none; }
+.tab-btn.active { background: var(--color-surface); color: var(--color-text); box-shadow: var(--shadow-sm); }
+.tab-btn:hover:not(.active) { color: var(--color-text); }
+
+/* SECTIONS */
+.section-view { display: none; }
+.section-view.visible { display: block; }
+
+/* CROP FACTOR GRID */
+.factor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-6); }
+.factor-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4); }
+.factor-card-icon { width: 36px; height: 36px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-3); }
+.factor-card-title { font-size: var(--text-sm); font-weight: 600; margin-bottom: var(--space-1); }
+.factor-card-val { font-family: var(--font-mono); font-size: var(--text-lg); font-weight: 700; }
+.factor-card-status { font-size: var(--text-xs); color: var(--color-text-muted); margin-top: var(--space-1); }
+
+/* SOIL METER */
+.soil-meter { display: flex; flex-direction: column; gap: var(--space-3); }
+.soil-layer { display: flex; align-items: center; gap: var(--space-3); }
+.soil-depth { font-size: var(--text-xs); color: var(--color-text-muted); width: 60px; flex-shrink: 0; font-family: var(--font-mono); }
+.soil-bar-wrap { flex: 1; }
+.soil-bar { height: 8px; background: var(--color-surface-offset-2); border-radius: var(--radius-full); overflow: hidden; }
+.soil-bar-fill { height: 100%; border-radius: var(--radius-full); }
+.soil-val { font-size: var(--text-xs); font-family: var(--font-mono); color: var(--color-text); width: 40px; text-align: right; flex-shrink: 0; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: var(--radius-full); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-faint); }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .app-shell { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: 1fr 1fr; }
+  .grid-3-1 { grid-template-columns: 1fr; }
+  .main-content { padding: var(--space-4); }
+}
+
+@media (max-width: 500px) {
+  .grid-4 { grid-template-columns: 1fr 1fr; }
+  .grid-2 { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+.btn { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-5); border-radius: var(--radius-md); font-size: var(--text-sm); font-weight: 500; cursor: pointer; border: none; transition: background var(--transition-interactive), color var(--transition-interactive); }
+.btn-primary { background: var(--color-primary); color: white; }
+.btn-primary:hover { background: var(--color-primary-hover); }
+.btn-ghost { background: transparent; color: var(--color-text-muted); border: 1px solid var(--color-border); }
+.btn-ghost:hover { background: var(--color-surface-offset); color: var(--color-text); }
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="logo-mark">
+      <svg class="logo-icon" viewBox="0 0 28 28" fill="none" aria-label="AgroWeather Logo">
+        <rect width="28" height="28" rx="7" fill="var(--color-primary)" opacity="0.15"/>
+        <path d="M14 6C9.58 6 6 9.58 6 14s3.58 8 8 8 8-3.58 8-8" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round"/>
+        <path d="M14 10v4l3 2" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M19 6l3-2M22 9l-3-1" stroke="var(--color-warning)" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="21" cy="7" r="2" fill="var(--color-warning)" opacity="0.8"/>
+      </svg>
+      AgroWeather
+    </div>
+    <div class="topbar-center">
+      <div class="search-bar">
+        <i data-lucide="search" class="s-icon" style="width:14px;height:14px;"></i>
+        <input type="text" placeholder="Search location, crop, or data source…" aria-label="Search">
+      </div>
+      <span class="live-badge"><span class="status-dot"></span> Live Data</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="icon-btn" title="Alerts"><i data-lucide="bell" style="width:18px;height:18px;"></i></button>
+      <button class="icon-btn" title="Download report"><i data-lucide="download" style="width:18px;height:18px;"></i></button>
+      <button class="icon-btn" aria-label="Switch theme" data-theme-toggle>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" role="navigation" aria-label="Main navigation">
+    <div class="nav-section">
+      <div class="nav-section-label">Overview</div>
+      <div class="nav-item active" onclick="switchSection('dashboard', this)">
+        <i data-lucide="layout-dashboard"></i> Dashboard
+      </div>
+      <div class="nav-item" onclick="switchSection('forecast', this)">
+        <i data-lucide="cloud-sun"></i> 7-Day Forecast
+      </div>
+      <div class="nav-item" onclick="switchSection('alerts', this)">
+        <i data-lucide="triangle-alert"></i> Crop Alerts
+      </div>
+    </div>
+    <div class="nav-divider"></div>
+    <div class="nav-section">
+      <div class="nav-section-label">Farm Intelligence</div>
+      <div class="nav-item" onclick="switchSection('soil', this)">
+        <i data-lucide="layers"></i> Soil & Moisture
+      </div>
+      <div class="nav-item" onclick="switchSection('crop', this)">
+        <i data-lucide="sprout"></i> Crop Suitability
+      </div>
+      <div class="nav-item" onclick="switchSection('irrigation', this)">
+        <i data-lucide="droplets"></i> Irrigation Planner
+      </div>
+    </div>
+    <div class="nav-divider"></div>
+    <div class="nav-section">
+      <div class="nav-section-label">Open Data Sources</div>
+      <div class="nav-item" onclick="switchSection('datasets', this)">
+        <i data-lucide="database"></i> Dataset Registry
+      </div>
+      <div class="nav-item" onclick="switchSection('api', this)">
+        <i data-lucide="code-2"></i> API Explorer
+      </div>
+    </div>
+    <div class="nav-divider"></div>
+    <div class="nav-section">
+      <div class="nav-item" onclick="switchSection('settings', this)">
+        <i data-lucide="settings"></i> Settings
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="main">
+
+    <!-- ===================== DASHBOARD ===================== -->
+    <section id="sec-dashboard" class="section-view visible">
+      <div class="page-header">
+        <div class="page-header-row">
+          <div>
+            <h1>Farm Weather Intelligence</h1>
+            <p>Real-time agrometeorological data for Solapur, Maharashtra — Kharif Season 2026</p>
+          </div>
+          <div style="display:flex;gap:var(--space-3);align-items:center;">
+            <button class="location-pill"><i data-lucide="map-pin"></i>Solapur, MH</button>
+            <button class="btn btn-ghost" style="font-size:var(--text-xs);"><i data-lucide="refresh-cw" style="width:14px;height:14px;"></i> Refresh</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI ROW -->
+      <div class="grid-4">
+        <div class="kpi-card">
+          <div class="kpi-label"><i data-lucide="thermometer" style="width:14px;height:14px;color:var(--color-warning);"></i> Temperature</div>
+          <div class="kpi-value" id="kpi-temp">32.4°C</div>
+          <div class="kpi-change warn"><i data-lucide="arrow-up" style="width:12px;height:12px;"></i> +1.8° vs 7-day avg</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label"><i data-lucide="cloud-rain" style="width:14px;height:14px;color:var(--color-blue);"></i> Rainfall (24h)</div>
+          <div class="kpi-value" id="kpi-rain">12.6 mm</div>
+          <div class="kpi-change up"><i data-lucide="arrow-up" style="width:12px;height:12px;"></i> +8.2 mm vs avg</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label"><i data-lucide="wind" style="width:14px;height:14px;color:var(--color-gold);"></i> Wind Speed</div>
+          <div class="kpi-value" id="kpi-wind">18 km/h</div>
+          <div class="kpi-change down"><i data-lucide="arrow-down" style="width:12px;height:12px;"></i> NW direction</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label"><i data-lucide="droplets" style="width:14px;height:14px;color:var(--color-primary);"></i> Humidity</div>
+          <div class="kpi-value" id="kpi-hum">74%</div>
+          <div class="kpi-change up"><i data-lucide="arrow-up" style="width:12px;height:12px;"></i> High — mold risk</div>
+        </div>
+      </div>
+
+      <!-- FORECAST STRIP -->
+      <div class="card" style="margin-bottom:var(--space-6);">
+        <div class="card-header"><span class="card-title"><i data-lucide="calendar-days" style="width:15px;height:15px;"></i> 7-Day Outlook</span><span class="badge badge-info">IMD + Open-Meteo</span></div>
+        <div class="forecast-row" id="forecast-strip"></div>
+      </div>
+
+      <!-- CHARTS ROW -->
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><span class="card-title"><i data-lucide="bar-chart-3" style="width:15px;height:15px;"></i> 30-Day Rainfall</span><span class="badge badge-muted">ERA5 Reanalysis</span></div>
+          <canvas id="rainChart" class="chart-area"></canvas>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title"><i data-lucide="activity" style="width:15px;height:15px;"></i> Temperature Trend</span><span class="badge badge-muted">OpenWeatherMap</span></div>
+          <canvas id="tempChart" class="chart-area"></canvas>
+        </div>
+      </div>
+
+      <!-- WEATHER BARS + ALERTS -->
+      <div class="grid-3-1">
+        <div class="card">
+          <div class="card-header"><span class="card-title"><i data-lucide="gauge" style="width:15px;height:15px;"></i> Current Conditions</span></div>
+          <div class="weather-bar-wrap">
+            <div class="weather-bar-header"><span>Rainfall Intensity</span><span style="font-family:var(--font-mono)">12.6 mm</span></div>
+            <div class="weather-bar"><div class="weather-bar-fill bar-rain" style="width:63%"></div></div>
+          </div>
+          <div class="weather-bar-wrap">
+            <div class="weather-bar-header"><span>Temperature (Max 45°C)</span><span style="font-family:var(--font-mono)">32.4°C</span></div>
+            <div class="weather-bar"><div class="weather-bar-fill bar-temp" style="width:72%"></div></div>
+          </div>
+          <div class="weather-bar-wrap">
+            <div class="weather-bar-header"><span>Relative Humidity</span><span style="font-family:var(--font-mono)">74%</span></div>
+            <div class="weather-bar"><div class="weather-bar-fill bar-humidity" style="width:74%"></div></div>
+          </div>
+          <div class="weather-bar-wrap">
+            <div class="weather-bar-header"><span>Wind Speed (Max 60)</span><span style="font-family:var(--font-mono)">18 km/h</span></div>
+            <div class="weather-bar"><div class="weather-bar-fill bar-wind" style="width:30%"></div></div>
+          </div>
+          <div class="weather-bar-wrap">
+            <div class="weather-bar-header"><span>UV Index (Max 12)</span><span style="font-family:var(--font-mono)">7.2</span></div>
+            <div class="weather-bar"><div class="weather-bar-fill" style="width:60%;background:var(--color-error)"></div></div>
+          </div>
+          <div style="margin-top:var(--space-5);">
+            <div class="card-title" style="margin-bottom:var(--space-3);"><i data-lucide="table-2" style="width:15px;height:15px;"></i> Station Observations</div>
+            <table class="data-table">
+              <thead><tr><th>Parameter</th><th>Value</th><th>Source</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>Soil Temp (5cm)</td><td>28.1°C</td><td>IMD</td><td><span class="badge badge-success">Normal</span></td></tr>
+                <tr><td>ET₀ (Ref EvapoT)</td><td>5.4 mm/day</td><td>FAO</td><td><span class="badge badge-warn">High</span></td></tr>
+                <tr><td>Growing Deg Days</td><td>1248 GDD</td><td>AgERA5</td><td><span class="badge badge-success">On Track</span></td></tr>
+                <tr><td>Solar Radiation</td><td>18.4 MJ/m²</td><td>NASA POWER</td><td><span class="badge badge-success">Good</span></td></tr>
+                <tr><td>Dew Point</td><td>24.6°C</td><td>Open-Meteo</td><td><span class="badge badge-warn">Mold Risk</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title"><i data-lucide="zap" style="width:15px;height:15px;"></i> Farm Alerts</span></div>
+          <div class="alert-item warn">
+            <i data-lucide="cloud-drizzle" class="alert-icon warn" style="width:16px;height:16px;"></i>
+            <div><div class="alert-title">Heavy Rainfall Expected</div><div class="alert-desc">72mm forecast in next 48h. Delay sowing of soybean.</div></div>
+          </div>
+          <div class="alert-item error">
+            <i data-lucide="bug" class="alert-icon error" style="width:16px;height:16px;"></i>
+            <div><div class="alert-title">Aphid Pressure High</div><div class="alert-desc">High humidity (>70%) favors pest outbreak. Scout fields.</div></div>
+          </div>
+          <div class="alert-item success">
+            <i data-lucide="sprout" class="alert-icon success" style="width:16px;height:16px;"></i>
+            <div><div class="alert-title">Good Kharif Window</div><div class="alert-desc">Optimal temp + moisture for Cotton/Jowar sowing June 15–22.</div></div>
+          </div>
+          <div class="alert-item info">
+            <i data-lucide="droplets" class="alert-icon info" style="width:16px;height:16px;"></i>
+            <div><div class="alert-title">Irrigation Advisory</div><div class="alert-desc">Skip irrigation today — soil moisture at field capacity.</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== DATASETS ===================== -->
+    <section id="sec-datasets" class="section-view">
+      <div class="page-header">
+        <h1>Open Dataset Registry</h1>
+        <p>Curated open-source datasets for agricultural weather prediction. All datasets are free to use with attribution.</p>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="filterDS('all',this)">All Sources</button>
+        <button class="tab-btn" onclick="filterDS('weather',this)">Weather</button>
+        <button class="tab-btn" onclick="filterDS('soil',this)">Soil & Land</button>
+        <button class="tab-btn" onclick="filterDS('satellite',this)">Satellite</button>
+        <button class="tab-btn" onclick="filterDS('india',this)">India Specific</button>
+      </div>
+
+      <div class="card" style="margin-bottom:var(--space-6);">
+        <div class="card-header">
+          <span class="card-title"><i data-lucide="cloud" style="width:15px;height:15px;"></i> Weather & Climate Datasets</span>
+          <span class="badge badge-success">7 Sources</span>
+        </div>
+        <div id="ds-list">
+
+          <div class="ds-row" data-cat="weather">
+            <div class="ds-icon" style="background:var(--color-primary-highlight);color:var(--color-primary);"><i data-lucide="cloud-sun" style="width:16px;height:16px;"></i></div>
+            <div style="flex:1;">
+              <div class="ds-name">Open-Meteo Free Weather API</div>
+              <div class="ds-desc">30+ NWP models, ERA5 historical data from 1940, no API key, CC BY 4.0. Perfect for predictions.</div>
+              <div class="ds-tags" style="margin-top:var(--space-2);"><span class="badge badge-info">FREE</span><span class="badge badge-muted">Forecast</span><span class="badge badge-muted">Historical</span></div>
+            </div>
+            <div class="ds-meta"><div style="margin-bottom:4px;">Global · 1km res</div><a href="https://open-meteo.com" target="_blank" class="ds-link">open-meteo.com →</a></div>
+          </div>
+
+          <div class="ds-row" data-cat="weather">
+            <div class="ds-icon" style="background:var(--color-blue-highlight);color:var(--color-blue);"><i data-lucide="satellite" style="width:16px;height:16px;"></i></div>
+            <div style="flex:1;">
+              <div class="ds-name">NASA POWER (Prediction of Worldwide Energy Resources)</div>
+              <div class="ds-desc">Solar radiation, temperature, humidity, wind for agriculture. Daily data since 1984.</div>
+              <div class="ds-tags" style="margin-top:var(--space-2);"><span class="badge badge-info">FREE</span><span class="badge badge-muted">Solar</span><span class="badge badge-muted">Agri-specific</span></div>
+            </div>
+            <div class="ds-meta"><div style="margin-bottom:4px;">Global · 0.5° res</div><a href="https://power.larc.nasa.gov" target="_blank" class="ds-link">power.larc.nasa.gov →</a></div>
+          </div>
+
+          <div class="ds-row" data-cat="weather">
+            <div class="ds-icon" style="background:var(--color-warning-highlight);color:var(--color-warning);"><i data-lucide="wind" style="width:16px;height:16px;"></i></div>
+            <div style="flex:1;">
+              <div class="ds-name">ECMWF ERA5 / AgERA5 Reanalysis</div>
+              <div class="ds-desc">22 agrometeorological variables (temp, rainfall, humidity, GDD) from 1979. Tailored for agriculture.</div>
+              <div class="ds-tags" style="margin-top:var(--space-2);"><span class="badge badge-info">FREE</span><span class="badge badge-muted">Reanalysis</span><span class="badge badge-muted">AgERA5</span></div>
+            </div>
+            <div class="ds-meta"><div style="margin-bottom:4px;">Global · 0.1°</div><a href="https://cds.climate.copernicus.eu" target="_blank" class="ds-link">Copernicus CDS →</a></div>
+          </div>
+
+          <div class="ds-row" data-cat="weather">
+            <div class="ds-icon" style="background:var(--color-primary-highlight);color:var(--color-primary);"><i data-lucide="cloud-rain" style="width:16px;height:16px;"></i></div>
+            <div style="flex:1;">
+              <div class="ds-name">OpenWeatherMap API</div>
+              <div class="ds-desc">Current weather, 5-day forecasts, hourly data. Generous free tier (1000 calls/day).</div>
+              <div class="ds-tags" style="margin-top:var(--space-2);"><span class="badge badge-info">FREE TIER</span><span class="badge badge-muted">Real-time</span><span class="badge badge-muted">JSON/XML</span></div>
+            </div>
+            <div class="ds-meta"><div style="margin-bottom:4px;">Global</div><a href="https://openweathermap.org/api" target="_blank" class="ds-link">openweathermap.org →</a></div>
+          </div>
+
+          <div class="ds-row" data-cat="weather india">
+            <div class="ds-icon" style="background:var(--color-gold-highlight);color:var(--color-gold);"><i data-lucide="map" style="width:16px;height:16px;"></i></div>
+            <div style="flex:1;">
+              <div class="ds-name">IMD Open Data (India Meteorological Department)</div>
+              <div class="ds-desc">India-specific rainfall, temperature, monsoon forecasts, district-level data. Official government source.</div>
+              <div class="ds-tags" style="margin-top:var(--space-2);"><span class="badge badge-info">FREE</span><span class="badge badge-muted">India</span><span class="badge badge-muted">Monsoon</span></div>
+            </div>
+            <div class="ds-meta"><div style="margin-bottom:4px;">India · District level</div><a href="https://mausam.imd.gov.in" target="_blank" class="ds-link">mausam.imd.gov.in →</a></div>
+          </div>
+
+          <div class="ds-row" data-cat="weather india">
+            <div class="ds-icon" style="background:var(--color-success-highlight);color:var(--color-success);"><i data-lucide="database" style="width:16px;height:16px;"></i></div>
+            <div style="flex:1;">
+              <div class="ds-name">CRIDA Agromet Databank</div>
+              <div class="ds-desc">8 basic + 7 derived agromet parameters (ET₀, soil moisture, water balance) from ICAR stations across India.</div>
+              <div class="ds-tags" style="margin-top:var(--space-2);"><span class="badge badge-info">FREE</span><span class="badge badge-muted">India</span><span class="badge badge-muted">ET₀</span><span class="badge badge-muted">Soil Moisture</span></div>
+            </div>
+            <div class="ds-meta"><div style="margin-bottom:4px;">India · Station data</div><a href="http://www.cropweatheroutlook.in" target="_blank" class="ds-link">cropweatheroutlook.in →</a></div>
+          </div>
+
+          <div class="ds-row" data-cat="satellite">
+            <div class="ds-icon" style="background:var(--color-blue-highlight);color:var(--color-blue);"><i data-lucide="globe" style="width:16px;height:16px;"></i></div>
+            <div style="flex:1;">
+              <div class="ds-name">NASA Earthdata — Agriculture Production</div>
+              <div class="ds-desc">NDVI, land surface temp, soil moisture, crop extent, evapotranspiration from satellite observations.</div>
+              <div class="ds-tags" style="margin-top:var(--space-2);"><span class="badge badge-info">FREE</span><span class="badge badge-muted">NDVI</span><span class="badge badge-muted">Satellite</span><span class="badge badge-muted">LST</span></div>
+            </div>
+            <div class="ds-meta"><div style="margin-bottom:4px;">Global · 500m res</div><a href="https://earthdata.nasa.gov" target="_blank" class="ds-link">earthdata.nasa.gov →</a></div>
+          </div>
+
+          <div class="ds-row" data-cat="soil">
+            <div class="ds-icon" style="background:var(--color-warning-highlight);color:var(--color-warning);"><i data-lucide="layers" style="width:16px;height:16px;"></i></div>
+            <div style="flex:1;">
+              <div class="ds-name">SoilGrids 250m (ISRIC World Soil Information)</div>
+              <div class="ds-desc">Soil pH, clay, sand, silt, organic carbon, bulk density globally at 250m resolution. REST API available.</div>
+              <div class="ds-tags" style="margin-top:var(--space-2);"><span class="badge badge-info">FREE</span><span class="badge badge-muted">Soil pH</span><span class="badge badge-muted">Organic Carbon</span><span class="badge badge-muted">Texture</span></div>
+            </div>
+            <div class="ds-meta"><div style="margin-bottom:4px;">Global · 250m</div><a href="https://soilgrids.org" target="_blank" class="ds-link">soilgrids.org →</a></div>
+          </div>
+
+          <div class="ds-row" data-cat="soil india">
+            <div class="ds-icon" style="background:var(--color-success-highlight);color:var(--color-success);"><i data-lucide="sprout" style="width:16px;height:16px;"></i></div>
+            <div style="flex:1;">
+              <div class="ds-name">NBSS&LUP Soil Data (India)</div>
+              <div class="ds-desc">National Bureau of Soil Survey & Land Use Planning. State-wise soil health, type, and fertility data for India.</div>
+              <div class="ds-tags" style="margin-top:var(--space-2);"><span class="badge badge-info">FREE</span><span class="badge badge-muted">India</span><span class="badge badge-muted">Soil Health</span></div>
+            </div>
+            <div class="ds-meta"><div style="margin-bottom:4px;">India · State level</div><a href="https://www.nbsslup.in" target="_blank" class="ds-link">nbsslup.in →</a></div>
+          </div>
+
+          <div class="ds-row" data-cat="satellite india">
+            <div class="ds-icon" style="background:var(--color-blue-highlight);color:var(--color-blue);"><i data-lucide="scan" style="width:16px;height:16px;"></i></div>
+            <div style="flex:1;">
+              <div class="ds-name">ISRO Bhuvan & VEDAS Portal</div>
+              <div class="ds-desc">India satellite imagery, crop mapping, NDVI monitoring, drought monitoring by ISRO. Government of India.</div>
+              <div class="ds-tags" style="margin-top:var(--space-2);"><span class="badge badge-info">FREE</span><span class="badge badge-muted">India</span><span class="badge badge-muted">NDVI</span><span class="badge badge-muted">Drought</span></div>
+            </div>
+            <div class="ds-meta"><div style="margin-bottom:4px;">India · 30m res</div><a href="https://bhuvan.nrsc.gov.in" target="_blank" class="ds-link">bhuvan.nrsc.gov.in →</a></div>
+          </div>
+
+          <div class="ds-row" data-cat="soil">
+            <div class="ds-icon" style="background:var(--color-primary-highlight);color:var(--color-primary);"><i data-lucide="droplets" style="width:16px;height:16px;"></i></div>
+            <div style="flex:1;">
+              <div class="ds-name">Copernicus Soil Moisture (SWI)</div>
+              <div class="ds-desc">Surface & deep soil water index from Copernicus Global Land Service. Daily updates, global coverage.</div>
+              <div class="ds-tags" style="margin-top:var(--space-2);"><span class="badge badge-info">FREE</span><span class="badge badge-muted">Soil Moisture</span><span class="badge badge-muted">Daily</span></div>
+            </div>
+            <div class="ds-meta"><div style="margin-bottom:4px;">Global · 1km</div><a href="https://land.copernicus.eu" target="_blank" class="ds-link">land.copernicus.eu →</a></div>
+          </div>
+
+          <div class="ds-row" data-cat="weather india">
+            <div class="ds-icon" style="background:var(--color-gold-highlight);color:var(--color-gold);"><i data-lucide="sun" style="width:16px;height:16px;"></i></div>
+            <div style="flex:1;">
+              <div class="ds-name">TNAU Agritech Weather Network</div>
+              <div class="ds-desc">385 AWS stations across Tamil Nadu collecting 10 agri-weather parameters hourly. Medium-range forecasts.</div>
+              <div class="ds-tags" style="margin-top:var(--space-2);"><span class="badge badge-info">FREE</span><span class="badge badge-muted">India</span><span class="badge badge-muted">AWS Network</span></div>
+            </div>
+            <div class="ds-meta"><div style="margin-bottom:4px;">South India</div><a href="http://tawn.tnau.ac.in" target="_blank" class="ds-link">tawn.tnau.ac.in →</a></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Factors Table -->
+      <div class="card">
+        <div class="card-header"><span class="card-title"><i data-lucide="sprout" style="width:15px;height:15px;"></i> Key Farming Factors from Datasets</span></div>
+        <table class="data-table">
+          <thead>
+            <tr><th>Factor</th><th>Parameter</th><th>Source Dataset</th><th>Farming Use</th><th>Update Freq</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Temperature</td><td>Min / Max / Mean °C</td><td>Open-Meteo, IMD</td><td>Sowing windows, GDD calc</td><td>Hourly</td></tr>
+            <tr><td>Rainfall</td><td>Precipitation mm</td><td>ERA5, IMD</td><td>Irrigation planning, flood risk</td><td>Hourly</td></tr>
+            <tr><td>Soil Moisture</td><td>VWC %, SWI</td><td>Copernicus, CRIDA</td><td>Irrigation triggers</td><td>Daily</td></tr>
+            <tr><td>Evapotranspiration</td><td>ET₀ mm/day</td><td>FAO, AgERA5</td><td>Water need per crop</td><td>Daily</td></tr>
+            <tr><td>NDVI</td><td>Vegetation Index</td><td>NASA, ISRO Bhuvan</td><td>Crop health monitoring</td><td>8–16 days</td></tr>
+            <tr><td>Wind</td><td>Speed / Direction</td><td>Open-Meteo, IMD</td><td>Spray timing, evaporation</td><td>Hourly</td></tr>
+            <tr><td>Humidity</td><td>RH% morning/evening</td><td>CRIDA, ERA5</td><td>Fungal/pest disease models</td><td>Hourly</td></tr>
+            <tr><td>Solar Radiation</td><td>MJ/m²/day</td><td>NASA POWER</td><td>Photosynthesis, solar drying</td><td>Daily</td></tr>
+            <tr><td>Growing Degree Days</td><td>GDD accumulated</td><td>AgERA5, CRIDA</td><td>Crop phenology prediction</td><td>Daily</td></tr>
+            <tr><td>Soil Properties</td><td>pH, OC, texture</td><td>SoilGrids, NBSS</td><td>Fertilizer & crop selection</td><td>Static</td></tr>
+            <tr><td>Drought Index</td><td>SPI, PDSI</td><td>ISRO VEDAS, NASA</td><td>Water stress early warning</td><td>Weekly</td></tr>
+            <tr><td>UV Index</td><td>UVI</td><td>Open-Meteo</td><td>Worker safety, crop stress</td><td>Hourly</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== SOIL ===================== -->
+    <section id="sec-soil" class="section-view">
+      <div class="page-header">
+        <h1>Soil & Moisture Analysis</h1>
+        <p>Real-time soil moisture profile and nutrient index — Solapur district fields</p>
+      </div>
+      <div class="grid-4">
+        <div class="kpi-card">
+          <div class="kpi-label"><i data-lucide="droplets" style="width:14px;height:14px;color:var(--color-blue);"></i> Surface Moisture</div>
+          <div class="kpi-value">38%</div>
+          <div class="kpi-change up">Near field capacity</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label"><i data-lucide="beaker" style="width:14px;height:14px;color:var(--color-warning);"></i> Soil pH</div>
+          <div class="kpi-value">7.2</div>
+          <div class="kpi-change up">Slightly alkaline — OK</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label"><i data-lucide="leaf" style="width:14px;height:14px;color:var(--color-primary);"></i> Organic Carbon</div>
+          <div class="kpi-value">0.62%</div>
+          <div class="kpi-change warn">Low — needs amendment</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label"><i data-lucide="layers" style="width:14px;height:14px;color:var(--color-gold);"></i> Soil Type</div>
+          <div class="kpi-value" style="font-size:var(--text-lg);">Vertisol</div>
+          <div class="kpi-change up">Black cotton soil</div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><span class="card-title"><i data-lucide="layers" style="width:15px;height:15px;"></i> Soil Moisture Profile (by depth)</span></div>
+          <div class="soil-meter" style="margin-top:var(--space-2);">
+            <div class="soil-layer"><span class="soil-depth">0–10 cm</span><div class="soil-bar-wrap"><div class="soil-bar"><div class="soil-bar-fill" style="width:80%;background:var(--color-blue);"></div></div></div><span class="soil-val">38%</span></div>
+            <div class="soil-layer"><span class="soil-depth">10–20 cm</span><div class="soil-bar-wrap"><div class="soil-bar"><div class="soil-bar-fill" style="width:70%;background:var(--color-primary);"></div></div></div><span class="soil-val">32%</span></div>
+            <div class="soil-layer"><span class="soil-depth">20–40 cm</span><div class="soil-bar-wrap"><div class="soil-bar"><div class="soil-bar-fill" style="width:60%;background:var(--color-primary);"></div></div></div><span class="soil-val">27%</span></div>
+            <div class="soil-layer"><span class="soil-depth">40–60 cm</span><div class="soil-bar-wrap"><div class="soil-bar"><div class="soil-bar-fill" style="width:45%;background:var(--color-warning);"></div></div></div><span class="soil-val">20%</span></div>
+            <div class="soil-layer"><span class="soil-depth">60–100 cm</span><div class="soil-bar-wrap"><div class="soil-bar"><div class="soil-bar-fill" style="width:30%;background:var(--color-warning);"></div></div></div><span class="soil-val">14%</span></div>
+          </div>
+          <div style="margin-top:var(--space-4);font-size:var(--text-xs);color:var(--color-text-muted);">Sources: Copernicus SWI + CRIDA Agromet Databank</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title"><i data-lucide="flask-conical" style="width:15px;height:15px;"></i> Nutrient Status</span></div>
+          <table class="data-table">
+            <thead><tr><th>Nutrient</th><th>Level (mg/kg)</th><th>Rating</th></tr></thead>
+            <tbody>
+              <tr><td>Nitrogen (N)</td><td>210</td><td><span class="badge badge-warn">Medium</span></td></tr>
+              <tr><td>Phosphorus (P)</td><td>18</td><td><span class="badge badge-error">Low</span></td></tr>
+              <tr><td>Potassium (K)</td><td>340</td><td><span class="badge badge-success">High</span></td></tr>
+              <tr><td>Sulphur (S)</td><td>12</td><td><span class="badge badge-warn">Medium</span></td></tr>
+              <tr><td>Zinc (Zn)</td><td>0.4</td><td><span class="badge badge-error">Deficient</span></td></tr>
+              <tr><td>Boron (B)</td><td>0.6</td><td><span class="badge badge-success">Adequate</span></td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top:var(--space-4);font-size:var(--text-xs);color:var(--color-text-muted);">Source: NBSS&LUP + Soil Health Card data (Govt of India)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== CROP SUITABILITY ===================== -->
+    <section id="sec-crop" class="section-view">
+      <div class="page-header">
+        <h1>Crop Suitability Index</h1>
+        <p>AI-powered crop recommendations based on weather + soil + historical yield data</p>
+      </div>
+      <div class="factor-grid">
+        <div class="factor-card">
+          <div class="factor-card-icon" style="background:var(--color-success-highlight);color:var(--color-success);"><i data-lucide="wheat" style="width:20px;height:20px;"></i></div>
+          <div class="factor-card-title">Soybean (Kharif)</div>
+          <div class="factor-card-val" style="color:var(--color-success);">92%</div>
+          <div class="factor-card-status">✅ Highly Suitable — Sow Jun 15–25</div>
+        </div>
+        <div class="factor-card">
+          <div class="factor-card-icon" style="background:var(--color-success-highlight);color:var(--color-success);"><i data-lucide="sprout" style="width:20px;height:20px;"></i></div>
+          <div class="factor-card-title">Cotton</div>
+          <div class="factor-card-val" style="color:var(--color-success);">87%</div>
+          <div class="factor-card-status">✅ Suitable — Vertisol match</div>
+        </div>
+        <div class="factor-card">
+          <div class="factor-card-icon" style="background:var(--color-warning-highlight);color:var(--color-warning);"><i data-lucide="leaf" style="width:20px;height:20px;"></i></div>
+          <div class="factor-card-title">Jowar (Sorghum)</div>
+          <div class="factor-card-val" style="color:var(--color-warning);">74%</div>
+          <div class="factor-card-status">⚠️ Moderate — Low P in soil</div>
+        </div>
+        <div class="factor-card">
+          <div class="factor-card-icon" style="background:var(--color-warning-highlight);color:var(--color-warning);"><i data-lucide="circle-dot" style="width:20px;height:20px;"></i></div>
+          <div class="factor-card-title">Tur (Pigeon Pea)</div>
+          <div class="factor-card-val" style="color:var(--color-warning);">68%</div>
+          <div class="factor-card-status">⚠️ OK — Monitor waterlogging</div>
+        </div>
+        <div class="factor-card">
+          <div class="factor-card-icon" style="background:var(--color-error-highlight);color:var(--color-error);"><i data-lucide="banana" style="width:20px;height:20px;"></i></div>
+          <div class="factor-card-title">Sugarcane</div>
+          <div class="factor-card-val" style="color:var(--color-error);">45%</div>
+          <div class="factor-card-status">❌ Not ideal — Water deficit risk</div>
+        </div>
+        <div class="factor-card">
+          <div class="factor-card-icon" style="background:var(--color-blue-highlight);color:var(--color-blue);"><i data-lucide="salad" style="width:20px;height:20px;"></i></div>
+          <div class="factor-card-title">Groundnut</div>
+          <div class="factor-card-val" style="color:var(--color-blue);">78%</div>
+          <div class="factor-card-status">🔵 Good — Low OC concern</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title"><i data-lucide="info" style="width:15px;height:15px;"></i> Suitability Model Inputs</span></div>
+        <table class="data-table">
+          <thead><tr><th>Input Factor</th><th>Weight</th><th>Current Value</th><th>Ideal Range</th><th>Score</th></tr></thead>
+          <tbody>
+            <tr><td>Soil Moisture</td><td>20%</td><td>38%</td><td>30–45%</td><td><span class="badge badge-success">Good</span></td></tr>
+            <tr><td>Temperature (avg)</td><td>20%</td><td>32.4°C</td><td>25–35°C</td><td><span class="badge badge-success">Good</span></td></tr>
+            <tr><td>Rainfall (seasonal)</td><td>20%</td><td>620 mm projected</td><td>500–800mm</td><td><span class="badge badge-success">Good</span></td></tr>
+            <tr><td>Soil pH</td><td>15%</td><td>7.2</td><td>6.5–7.5</td><td><span class="badge badge-success">Good</span></td></tr>
+            <tr><td>Organic Carbon</td><td>10%</td><td>0.62%</td><td>>0.75%</td><td><span class="badge badge-warn">Low</span></td></tr>
+            <tr><td>Solar Radiation</td><td>10%</td><td>18.4 MJ/m²</td><td>15–22 MJ/m²</td><td><span class="badge badge-success">Good</span></td></tr>
+            <tr><td>Phosphorus</td><td>5%</td><td>18 mg/kg</td><td>>25 mg/kg</td><td><span class="badge badge-error">Low</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== FORECAST ===================== -->
+    <section id="sec-forecast" class="section-view">
+      <div class="page-header"><h1>7-Day Detailed Forecast</h1><p>Solapur, Maharashtra — IMD + Open-Meteo ensemble</p></div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Extended Forecast</span><span class="badge badge-info">Open-Meteo API</span></div>
+        <table class="data-table">
+          <thead><tr><th>Date</th><th>Condition</th><th>Temp °C (H/L)</th><th>Rain mm</th><th>Humidity %</th><th>Wind km/h</th><th>Farm Advisory</th></tr></thead>
+          <tbody id="forecast-table-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== ALERTS ===================== -->
+    <section id="sec-alerts" class="section-view">
+      <div class="page-header"><h1>Crop Alerts & Advisories</h1><p>AI-generated alerts combining weather forecast + pest pressure models</p></div>
+      <div class="grid-2">
+        <div>
+          <div class="alert-item error"><i data-lucide="cloud-lightning" class="alert-icon error" style="width:18px;height:18px;"></i><div><div class="alert-title">🔴 Heavy Rain Alert — 48h</div><div class="alert-desc">72mm forecast. Risk of waterlogging in low-lying fields. Ensure drainage channels are clear.</div></div></div>
+          <div class="alert-item warn"><i data-lucide="bug" class="alert-icon warn" style="width:18px;height:18px;"></i><div><div class="alert-title">🟡 Aphid & Whitefly Pressure</div><div class="alert-desc">Humidity >70% for 5 consecutive days. Scout cotton and soybean fields. Apply neem oil if found.</div></div></div>
+          <div class="alert-item warn"><i data-lucide="thermometer" class="alert-icon warn" style="width:18px;height:18px;"></i><div><div class="alert-title">🟡 Heat Stress Advisory</div><div class="alert-desc">Max temp >38°C projected on Jun 20–21. Avoid field work noon–3pm. Provide adequate irrigation.</div></div></div>
+          <div class="alert-item success"><i data-lucide="sun" class="alert-icon success" style="width:18px;height:18px;"></i><div><div class="alert-title">🟢 Kharif Sowing Window</div><div class="alert-desc">Optimum soil moisture and temp for soybean sowing from June 15–25. Proceed with seed treatment.</div></div></div>
+          <div class="alert-item info"><i data-lucide="droplets" class="alert-icon info" style="width:18px;height:18px;"></i><div><div class="alert-title">🔵 Irrigation Skip Advisory</div><div class="alert-desc">Soil at field capacity (38% VWC). Skip irrigation for next 3 days to prevent waterlogging.</div></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Alert Statistics</span></div>
+          <canvas id="alertChart" class="chart-area"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== IRRIGATION ===================== -->
+    <section id="sec-irrigation" class="section-view">
+      <div class="page-header"><h1>Irrigation Planner</h1><p>Demand-based irrigation scheduling using ET₀ + soil moisture data</p></div>
+      <div class="grid-3">
+        <div class="kpi-card"><div class="kpi-label">ET₀ Today</div><div class="kpi-value">5.4 mm</div><div class="kpi-change warn">High evapotranspiration</div></div>
+        <div class="kpi-card"><div class="kpi-label">Crop Water Need (Soybean Kc=0.7)</div><div class="kpi-value">3.8 mm</div><div class="kpi-change up">Moderate demand</div></div>
+        <div class="kpi-card"><div class="kpi-label">Today's Decision</div><div class="kpi-value" style="font-size:var(--text-lg);color:var(--color-success);">SKIP</div><div class="kpi-change up">Rain forecast covers need</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">7-Day Irrigation Schedule</span></div>
+        <table class="data-table">
+          <thead><tr><th>Date</th><th>ET₀ (mm)</th><th>Rainfall (mm)</th><th>Net Demand</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td>Jun 15</td><td>5.4</td><td>12.6</td><td>0</td><td><span class="badge badge-success">SKIP — Rain covers</span></td></tr>
+            <tr><td>Jun 16</td><td>5.2</td><td>18.0</td><td>0</td><td><span class="badge badge-success">SKIP — Heavy rain</span></td></tr>
+            <tr><td>Jun 17</td><td>5.8</td><td>4.0</td><td>1.8 mm</td><td><span class="badge badge-info">LIGHT — 15 min drip</span></td></tr>
+            <tr><td>Jun 18</td><td>6.1</td><td>0</td><td>6.1 mm</td><td><span class="badge badge-warn">IRRIGATE — 45 min</span></td></tr>
+            <tr><td>Jun 19</td><td>6.0</td><td>0</td><td>6.0 mm</td><td><span class="badge badge-warn">IRRIGATE — 45 min</span></td></tr>
+            <tr><td>Jun 20</td><td>6.8</td><td>0</td><td>6.8 mm</td><td><span class="badge badge-error">CRITICAL — 50 min drip</span></td></tr>
+            <tr><td>Jun 21</td><td>5.5</td><td>8.0</td><td>0</td><td><span class="badge badge-success">SKIP — Rain forecast</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== API EXPLORER ===================== -->
+    <section id="sec-api" class="section-view">
+      <div class="page-header"><h1>API Explorer</h1><p>Connect open datasets to your web app — sample calls and integration code</p></div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><span class="card-title"><i data-lucide="code-2" style="width:15px;height:15px;"></i> Open-Meteo — Solapur</span><span class="badge badge-success">Live</span></div>
+          <pre style="background:var(--color-surface-offset);border-radius:var(--radius-md);padding:var(--space-4);font-size:var(--text-xs);font-family:var(--font-mono);color:var(--color-text-muted);overflow-x:auto;line-height:1.7;">GET https://api.open-meteo.com/v1/forecast
+?latitude=17.67
+&longitude=75.90
+&daily=temperature_2m_max,
+  temperature_2m_min,
+  precipitation_sum,
+  et0_fao_evapotranspiration,
+  windspeed_10m_max,
+  uv_index_max
+&hourly=soil_moisture_0_to_1cm,
+  relativehumidity_2m
+&timezone=Asia/Kolkata
+&forecast_days=7</pre>
+          <div style="margin-top:var(--space-3);font-size:var(--text-xs);color:var(--color-text-muted);">✅ No API key needed · CC BY 4.0 · JSON response</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title"><i data-lucide="code-2" style="width:15px;height:15px;"></i> NASA POWER API</span><span class="badge badge-info">Solar + Agri</span></div>
+          <pre style="background:var(--color-surface-offset);border-radius:var(--radius-md);padding:var(--space-4);font-size:var(--text-xs);font-family:var(--font-mono);color:var(--color-text-muted);overflow-x:auto;line-height:1.7;">GET https://power.larc.nasa.gov/api/
+temporal/daily/point
+?parameters=ALLSKY_SFC_SW_DWN,
+  T2M_MAX,T2M_MIN,
+  PRECTOTCORR,WS10M,RH2M
+&community=AG
+&longitude=75.90
+&latitude=17.67
+&start=20260601
+&end=20260630
+&format=JSON</pre>
+          <div style="margin-top:var(--space-3);font-size:var(--text-xs);color:var(--color-text-muted);">✅ Free for all · Agriculture community endpoint</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SETTINGS ===================== -->
+    <section id="sec-settings" class="section-view">
+      <div class="page-header"><h1>Settings</h1><p>Configure your farm location, crop types, and data sources</p></div>
+      <div class="card" style="max-width:560px;">
+        <div class="card-header"><span class="card-title">Farm Profile</span></div>
+        <div style="display:flex;flex-direction:column;gap:var(--space-4);">
+          <div><label style="font-size:var(--text-xs);color:var(--color-text-muted);font-weight:600;display:block;margin-bottom:var(--space-2);">Farm Name</label><input type="text" value="Krishnapur Farm — Block 3" style="width:100%;background:var(--color-surface-offset);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-2) var(--space-4);font-size:var(--text-sm);color:var(--color-text);" /></div>
+          <div><label style="font-size:var(--text-xs);color:var(--color-text-muted);font-weight:600;display:block;margin-bottom:var(--space-2);">Location (Lat, Lng)</label><input type="text" value="17.67, 75.90" style="width:100%;background:var(--color-surface-offset);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-2) var(--space-4);font-size:var(--text-sm);color:var(--color-text);font-family:var(--font-mono);" /></div>
+          <div><label style="font-size:var(--text-xs);color:var(--color-text-muted);font-weight:600;display:block;margin-bottom:var(--space-2);">Primary Crop</label>
+          <select style="width:100%;background:var(--color-surface-offset);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-2) var(--space-4);font-size:var(--text-sm);color:var(--color-text);"><option>Soybean</option><option>Cotton</option><option>Jowar</option><option>Tur</option><option>Groundnut</option></select></div>
+          <div><button class="btn btn-primary" style="width:100%;">Save Settings</button></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// Theme toggle
+(function(){
+  const t=document.querySelector('[data-theme-toggle]'),r=document.documentElement;
+  let d=r.getAttribute('data-theme')||'dark';
+  t&&t.addEventListener('click',()=>{
+    d=d==='dark'?'light':'dark';
+    r.setAttribute('data-theme',d);
+  });
+})();
+
+// Nav switching
+function switchSection(id, el) {
+  document.querySelectorAll('.section-view').forEach(s=>s.classList.remove('visible'));
+  document.getElementById('sec-'+id).classList.add('visible');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// Dataset filter
+function filterDS(cat, el) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.ds-row').forEach(row=>{
+    if(cat==='all') { row.style.display='flex'; return; }
+    const cats = (row.dataset.cat||'').split(' ');
+    row.style.display = cats.includes(cat) ? 'flex' : 'none';
+  });
+}
+
+// Forecast strip
+const days=['Today','Mon','Tue','Wed','Thu','Fri','Sat'];
+const icons=['cloud-rain','cloud-drizzle','sun','cloud-sun','cloud-sun','cloud-rain','cloud-drizzle'];
+const temps=[['32','24'],['31','23'],['36','26'],['37','27'],['38','28'],['33','25'],['31','23']];
+const rains=[['82%'],['72%'],['5%'],['10%'],['8%'],['65%'],['70%']];
+const strip=document.getElementById('forecast-strip');
+days.forEach((d,i)=>{
+  const t=document.createElement('div');
+  t.className='forecast-tile'+(i===0?' today':'');
+  t.innerHTML=`<div class="forecast-day">${d}</div><svg class="forecast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-${icons[i]}"/></svg><div class="forecast-temp">${temps[i][0]}° / ${temps[i][1]}°</div><div class="forecast-rain-pct">💧 ${rains[i][0]}</div>`;
+  strip.appendChild(t);
+});
+
+// Forecast table
+const tbody=document.getElementById('forecast-table-body');
+const fdata=[
+  ['Jun 15','⛈️ Thunderstorm','32/24','18mm','78%','22 NW','Skip spray — wet conditions'],
+  ['Jun 16','🌧️ Heavy Rain','31/23','28mm','82%','18 W','Ensure field drainage'],
+  ['Jun 17','🌤️ Partly Cloudy','36/26','4mm','65%','20 SW','Light irrigation if needed'],
+  ['Jun 18','☀️ Sunny','37/27','0mm','58%','24 SW','Irrigate evening — ET₀ high'],
+  ['Jun 19','☀️ Hot & Sunny','38/28','0mm','55%','26 S','Irrigate morning only'],
+  ['Jun 20','🌧️ Rain Expected','33/25','14mm','72%','16 NW','Delay pesticide application'],
+  ['Jun 21','🌦️ Drizzle','31/23','8mm','76%','14 N','Monitor for fungal disease'],
+];
+fdata.forEach(r=>{
+  const tr=document.createElement('tr');
+  tr.innerHTML=r.map((v,i)=>`<td>${v}</td>`).join('');
+  tbody.appendChild(tr);
+});
+
+// Charts
+function getChartColors() {
+  const s=getComputedStyle(document.documentElement);
+  return {
+    primary: s.getPropertyValue('--color-primary').trim(),
+    blue: s.getPropertyValue('--color-blue').trim(),
+    text: s.getPropertyValue('--color-text-muted').trim(),
+    border: s.getPropertyValue('--color-border').trim(),
+    warning: s.getPropertyValue('--color-warning').trim(),
+  };
+}
+const c=getChartColors();
+
+// Rainfall chart
+const rainLabels=[];
+const rainData=[];
+for(let i=1;i<=30;i++){rainLabels.push(i);rainData.push(Math.max(0,Math.floor(Math.random()*25)));}
+new Chart(document.getElementById('rainChart'),{
+  type:'bar',data:{labels:rainLabels,datasets:[{label:'Rainfall mm',data:rainData,backgroundColor:c.blue+'55',borderColor:c.blue,borderWidth:1,borderRadius:2}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:c.text,font:{size:10},maxTicksLimit:10},grid:{display:false}},y:{ticks:{color:c.text,font:{size:10}},grid:{color:c.border+'55'}}}}
+});
+
+// Temp chart
+const tempMax=[],tempMin=[];
+for(let i=0;i<30;i++){const b=28+Math.sin(i/5)*4;tempMax.push((b+6+Math.random()*3).toFixed(1));tempMin.push((b+Math.random()*3).toFixed(1));}
+new Chart(document.getElementById('tempChart'),{
+  type:'line',data:{labels:rainLabels,datasets:[{label:'Max °C',data:tempMax,borderColor:c.warning,backgroundColor:'transparent',borderWidth:2,pointRadius:0,tension:0.4},{label:'Min °C',data:tempMin,borderColor:c.primary,backgroundColor:'transparent',borderWidth:2,pointRadius:0,tension:0.4}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:c.text,font:{size:10},boxWidth:12}}},scales:{x:{ticks:{color:c.text,font:{size:10},maxTicksLimit:10},grid:{display:false}},y:{ticks:{color:c.text,font:{size:10}},grid:{color:c.border+'55'}}}}
+});
+
+// Alert donut chart
+new Chart(document.getElementById('alertChart'),{
+  type:'doughnut',data:{labels:['Weather','Pest/Disease','Irrigation','Soil','Frost'],datasets:[{data:[8,5,4,3,1],backgroundColor:['#5098d0','#e05560','#4daa5c','#e09040','#a86fdf'],borderWidth:0}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:c.text,font:{size:11},padding:12,boxWidth:12}}}}
+});
+
+// Initialize Lucide icons
+lucide.createIcons();
+</script>
+</body>
+</html>
